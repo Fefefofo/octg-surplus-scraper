@@ -57,19 +57,28 @@ output/listings.csv
 
 ## How to add target sites
 
-Open `main.py` and update `TARGET_URLS`.
+Open `config.py` and update `TARGET_SITES`.
 
 Start with public pages that already list inventory in a readable page, then validate each site's terms of use and robots guidance before running repeated scrapes.
 
-Good future targets to evaluate:
+Current starter targets:
 
-- Rigzone marketplace or classifieds pages.
-- Public pipe surplus broker inventory pages.
-- Industrial surplus marketplace pages with OCTG, casing, tubing, drill pipe, or line pipe categories.
+- **KO Supply**: `https://kosupply.com/inventory/`
+  - Visible data: OD, weight, grade, end finish, length, manufacturer, status, joints, quantity in feet, comments, and MTR availability.
+  - Structure: static WordPress/wpDataTables inventory table. Rows are present in the HTML, so this should be the easiest first scraper target.
+  - Selector hints: `#table_4 tbody tr[data-row-index]`; columns map directly to the table headers. No row-level price is shown publicly.
+- **Surplus & Prime Worldwide**: `https://surplusandprime.com/product-category/oilfield-equipment/octg/`
+  - Visible data: product title with size/grade/spec/quantity details, product category, starting bid, image, and product detail URL.
+  - Structure: static WordPress/WooCommerce archive with paginated product cards. Detail pages may be needed for location and contact context.
+  - Selector hints: `ul.products li.product`; links are under `a.woocommerce-LoopProduct-link` or `a.ast-loop-product__link`; pagination is `nav.woocommerce-pagination a.page-numbers`.
+- **Salvex Pipe Trading**: `https://www.salvex.com/pipe/`
+  - Visible data after rendering: asset title, category, region/location, quantity, condition, asking price or bid state, and seller/contact workflow.
+  - Structure: Next.js/React app. Initial HTML contains the app shell and loading skeletons, so use browser-use or Playwright before extraction.
+  - Selector hints: start broad with rendered nodes such as `[class*='product']`, `[class*='asset']`, or `[class*='listing']`, then tighten after a browser inspection run.
 
 For each site:
 
-1. Add the inventory page URL to `TARGET_URLS`.
+1. Add or edit a `TargetSite` entry in `config.py`.
 2. Run once and inspect the browser-use summary.
 3. Tighten `EXTRACTION_PROMPT` with site-specific hints if needed.
 4. Confirm the CSV rows preserve critical fields like grade, OD, wall, quantity, yard location, and contact info.
@@ -83,15 +92,9 @@ writer.py      Saves normalized listings to CSV.
 main.py        Coordinates browser-use inspection, ScrapeGraphAI extraction, and CSV output.
 ```
 
-## Notes on the sample URL
+## Notes on target difficulty
 
-The starter uses a generic placeholder URL:
-
-```text
-https://example.com/industrial-surplus/octg-pipe
-```
-
-Swap this for a real target page before expecting meaningful results. The flow is intentionally structured so the browser step can help you understand page layout before the extraction step normalizes listings.
+Run KO Supply first because the table rows are available in page source. Surplus & Prime is also static, but the best extraction may combine archive cards with product detail pages. Salvex needs a rendered-browser pass before ScrapeGraphAI can see the listings.
 
 ## Next step: outreach email agent
 
