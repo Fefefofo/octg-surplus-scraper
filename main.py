@@ -1,8 +1,8 @@
 """Starter scrape flow for surplus OCTG pipe listings.
 
 This demo combines browser-use for browser navigation with ScrapeGraphAI for
-LLM-assisted extraction. The included target is a generic placeholder page
-shape so the project is safe to run while you swap in real public target URLs.
+LLM-assisted extraction. Target pages live in config.py so each source can
+carry URL, structure, and selector notes together.
 """
 
 from __future__ import annotations
@@ -13,16 +13,13 @@ from typing import Any
 from browser_use import Agent
 from scrapegraphai.graphs import SmartScraperGraph
 
-from config import settings
+from config import TARGET_SITES, settings
 from models import OCTGListing
 from writer import write_listings_csv
 
 
 TARGET_URLS = [
-    # Replace this with real public inventory pages once you confirm terms of use.
-    # Examples to evaluate later: Rigzone marketplace pages, pipe surplus brokers,
-    # or industrial surplus sites that publish OCTG inventory pages.
-    "https://example.com/industrial-surplus/octg-pipe",
+    site.url for site in TARGET_SITES
 ]
 
 
